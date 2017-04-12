@@ -53,6 +53,7 @@ Gui, Add, Text, xm y+6 w356 0x200, % "made with " love " and AHK 2013-" A_YYYY "
 
 Gui, Show, AutoSize, % name " " version
 
+GoSub, GetMemory
 SetTimer, GetMemory, 1000
 return
 
