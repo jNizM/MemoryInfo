@@ -4,10 +4,6 @@
 #SingleInstance Force
 SetBatchLines -1
 
-global name       := "MemoryInfo"
-global version    := "v0.3"
-global love       := chr(9829)
-
 ; GUI ===========================================================================================================================
 
 Gui, +hWndhMainGUI
@@ -32,16 +28,16 @@ Gui, Add, Text, xm y+5 w240 h1 0x5
 Gui, Add, Button, xm-1 y+4 w120 h25 gFREE_MEMORY, % "Clear Memory"
 Gui, Add, Text,   xm+125  yp+1 w115 h23 0x202 vEdtFreeMem
 
-Gui, Show, AutoSize, % name " " version
+Gui, Show, AutoSize
 SetTimer, GET_MEMORY, 2000
 
 ; SCRIPT ========================================================================================================================
 
 GET_MEMORY:
     GSMEx := GlobalMemoryStatusEx()
-    GuiControl,, EdtTotalPhys, % GetNumberFormat((TP := GSMEx.TotalPhys) / 102400) " MB"
-    GuiControl,, EdtAvailPhys, % GetNumberFormat((AP := GSMEx.AvailPhys) / 102400) " MB"
-    GuiControl,, EdtFreePhys,  % GetNumberFormat((TP - AP) / 102400) " MB"
+    GuiControl,, EdtTotalPhys, % GetNumberFormat((TP := GSMEx.TotalPhys) / 1048576) " MB"
+    GuiControl,, EdtAvailPhys, % GetNumberFormat((AP := GSMEx.AvailPhys) / 1048576) " MB"
+    GuiControl,, EdtFreePhys,  % GetNumberFormat((TP - AP) / 1048576) " MB"
     GuiControl,, PrgMemLoad,   % GSMEx.MemoryLoad
     GuiControl,, EdtMemLoad,   % GSMEx.MemoryLoad " %"
     DllCall("user32\SetWindowText", "ptr", hMainGUI, "str", "Mem: " GSMEx.MemoryLoad " %")
@@ -51,7 +47,7 @@ FREE_MEMORY:
     APBefore := GlobalMemoryStatusEx().AvailPhys
     FreeMemory()
     APAfter  := GlobalMemoryStatusEx().AvailPhys
-    GuiControl,, EdtFreeMem, % GetNumberFormat((APAfter - APBefore) / 102400) " MB"
+    GuiControl,, EdtFreeMem, % GetNumberFormat((APAfter - APBefore) / 1048576) " MB"
 return
 
 ; FUNCTIONS =====================================================================================================================
