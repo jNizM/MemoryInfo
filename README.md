@@ -1,4 +1,4 @@
-# MemoryInfo by jNizM
+# AHK MemoryInfo
 Shows info about memory via AutoHotkey
 
 
@@ -7,23 +7,30 @@ Shows info about memory via AutoHotkey
 * Shows used memory in percentage %
 * Clear unused memory function
 
-## Screenshot
-![Screenshot](Screenshot.png)
+
+## Example
+![MemoryInfo](img/MemoryInfo.png)
 
 
 ## Info
-* Version: v0.2
-* URL: [AHK Thread](http://ahkscript.org/boards/viewtopic.php?f=6&t=142)
-
-
-## Changelog
-* 0.2 | Bug Fixes
-* 0.1 | First Release
+* [AHK Thread](https://autohotkey.com/boards/viewtopic.php?f=6&t=142)
+* [GlobalMemoryStatusEx](https://msdn.microsoft.com/en-us/library/aa366589(v=vs.85).aspx)
+* [SetProcessWorkingSetSize](https://msdn.microsoft.com/en-us/library/ms686234(v=vs.85).aspx)
+* [EmptyWorkingSet](https://msdn.microsoft.com/en-us/library/ms682606(v=vs.85).aspx)
+* [GetNumberFormat](https://msdn.microsoft.com/en-us/library/dd318110(v=vs.85).aspx)
 
 
 ## Contributing
 * thanks to AutoHotkey Community
 
 
+## Questions / Bugs / Issues
+Report any bugs or issues on the [AHK Thread](https://autohotkey.com/boards/viewtopic.php?f=6&t=142). Same for any questions.
+
+
 ## Copyright and License
 [Unlicense](LICENSE)
+
+
+## Donations
+[Donations are appreciated if I could help you](https://www.paypal.me/smithz)

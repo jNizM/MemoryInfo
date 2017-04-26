@@ -1,121 +1,100 @@
-﻿; ===============================================================================================================================
-; AHK Version ...: AHK_L 1.1.19.03 x64 Unicode
-; Win Version ...: Windows 7 Professional x64 SP1
-; Description ...: Shows Info about Total, Free, Used Memory in MB;
-;                  Total Memory in Percentage & Clear unused Memory Function
-; Version .......: v0.2
-; Modified ......: 2015.02.15-1527
-; Author ........: jNizM
-; Licence .......: WTFPL (http://www.wtfpl.net/txt/copying/)
-; ===============================================================================================================================
-;@Ahk2Exe-SetName MemoryInfo
-;@Ahk2Exe-SetDescription MemoryInfo
-;@Ahk2Exe-SetVersion v0.2
-;@Ahk2Exe-SetCopyright Copyright (c) 2013-2015`, jNizM
-;@Ahk2Exe-SetOrigFilename MemoryInfo.ahk
-; ===============================================================================================================================
+﻿; GLOBAL SETTINGS ===============================================================================================================
 
-; GLOBAL SETTINGS ===============================================================================================================
-
-#Warn
 #NoEnv
 #SingleInstance Force
+SetBatchLines -1
 
 global name       := "MemoryInfo"
-global version    := "v0.2"
+global version    := "v0.3"
 global love       := chr(9829)
 
 ; GUI ===========================================================================================================================
 
+Gui, +hWndhMainGUI
 Gui, Margin, 10, 10
-Gui, Font, s9, Courier New
+Gui, Color, FFFFFF
+Gui, Font, s10, Lucida Console
 
-Gui, Add, Text, xm ym w110 h20 0x200, % "Total Memory:"
-Gui, Add, Text, x+5 ym w100 h20 0x202 vTMemory
+Gui, Add, Text, xm     ym  w120 h23 0x200, % "Total Memory:"
+Gui, Add, Text, xm+125 ym  w115 h23 0x202 vEdtTotalPhys
 
-Gui, Add, Text, xm y+6 w110 h20 0x200, % "Free Memory:"
-Gui, Add, Text, x+5 yp w100 h20 0x202 vFMemory
-Gui, Add, Progress, x+5 yp h20 r0-10 0x01 BackgroundC9C9C9 c5BB75E vPFMemory
-Gui, Add, Text, xp yp w135 h20 0x201 +BackgroundTrans vFreePerc
+Gui, Add, Text, xm     y+5 w120 h23 0x200, % "Free Memory:"
+Gui, Add, Text, xm+125 yp  w115 h23 0x202 vEdtAvailPhys
 
-Gui, Add, Text, xm y+6 w110 h20 0x200, % "Used Memory:"
-Gui, Add, Text, x+5 yp w100 h20 0x202 vUMemory
-Gui, Add, Progress, x+5 yp h20 r0-10 0x01 BackgroundC9C9C9 cDA4F49 vPUMemory
-Gui, Add, Text, xp yp w135 h20 0x201 +BackgroundTrans vUsedPerc
-Gui, Add, Text, xm y+10 w358 h1 0x10
+Gui, Add, Text, xm     y+5 w120 h23 0x200, % "Used Memory:"
+Gui, Add, Text, xm+125 yp  w115 h23 0x202 vEdtFreePhys
 
-Gui, Add, Text, xm y+10 w110 h20 0x200, % "Cleared Memory:"
-Gui, Add, Text, x+5 yp w100 h20 0x202 vCMMemory
-Gui, Add, Button, x+41 yp-3 w100 gClearMem, % "Clear Memory"
+Gui, Add, Progress, xm y+5 w240 h23 r0-100 BackgroundFFFFFF cCCE8FF vPrgMemLoad
+Gui, Add, Text, xp yp  w240 h23 0x201 +BackgroundTrans border vEdtMemLoad
 
-Gui, Font, cSilver
-Gui, Add, Text, xm y+6 w356 0x200, % "made with " love " and AHK 2013-" A_YYYY ", jNizM"
+Gui, Add, Text, xm y+5 w240 h1 0x5
+
+Gui, Add, Button, xm-1 y+4 w120 h25 gFREE_MEMORY, % "Clear Memory"
+Gui, Add, Text,   xm+125  yp+1 w115 h23 0x202 vEdtFreeMem
 
 Gui, Show, AutoSize, % name " " version
-
-SetTimer, GetMemory, 1000
-return
+SetTimer, GET_MEMORY, 2000
 
 ; SCRIPT ========================================================================================================================
 
-GetMemory:
-    GMSEx := GlobalMemoryStatusEx()
-    , TPM := Round(GMSEx[3] / 1024**2, 2), APM := Round(GMSEx[4] / 1024**2, 2)
-    , UPM := Round(TPM - APM, 2), UPP := Round(UPM / TPM * 100, 2)
-    , CLR := ((UPP < 70) ? "+c5BB75E" : ((UPP < 80) ? "+cFFC266" : "+cDA4F49"))
-
-    GuiControl,, TMemory, % TPM " MB"
-    GuiControl,, FMemory, % APM " MB"
-    GuiControl,, UMemory, % UPM " MB"
-    GuiControl,, FreePerc, % Round((100 - (TPM - APM) / TPM * 100), 2) " %"
-    GuiControl,, UsedPerc, % Round(((TPM - APM) / TPM * 100), 2) " %"
-
-    GuiControl +Range0-%TPM%, PFMemory
-    GuiControl,, PFMemory, % APM
-    GuiControl, % CLR, PFMemory
-
-    GuiControl +Range0-%TPM%, PUMemory
-    GuiControl,, PUMemory, % UPM
-    GuiControl, % CLR, PUMemory
+GET_MEMORY:
+    GSMEx := GlobalMemoryStatusEx()
+    GuiControl,, EdtTotalPhys, % GetNumberFormat((TP := GSMEx.TotalPhys) / 102400) " MB"
+    GuiControl,, EdtAvailPhys, % GetNumberFormat((AP := GSMEx.AvailPhys) / 102400) " MB"
+    GuiControl,, EdtFreePhys,  % GetNumberFormat((TP - AP) / 102400) " MB"
+    GuiControl,, PrgMemLoad,   % GSMEx.MemoryLoad
+    GuiControl,, EdtMemLoad,   % GSMEx.MemoryLoad " %"
+    DllCall("user32\SetWindowText", "ptr", hMainGUI, "str", "Mem: " GSMEx.MemoryLoad " %")
 return
 
-ClearMem:
-    GMSCA := Round(GlobalMemoryStatusEx().4 / 1024**2, 2)
-    ClearMemory(), FreeMemory()
-    GMSCB := Round(GlobalMemoryStatusEx().4 / 1024**2, 2)
-    GuiControl,, CMMemory, % Round(GMSCB - GMSCA, 2) " MB"
+FREE_MEMORY:
+    APBefore := GlobalMemoryStatusEx().AvailPhys
+    FreeMemory()
+    APAfter  := GlobalMemoryStatusEx().AvailPhys
+    GuiControl,, EdtFreeMem, % GetNumberFormat((APAfter - APBefore) / 102400) " MB"
 return
 
 ; FUNCTIONS =====================================================================================================================
 
-GlobalMemoryStatusEx()
+CtlColorBtns()
 {
-    static MSEX, init := VarSetCapacity(MSEX, 64, 0) && NumPut(64, MSEX, "UInt")
-    if !(DllCall("kernel32.dll\GlobalMemoryStatusEx", "Ptr", &MSEX))
-        return "*" DllCall("kernel32.dll\GetLastError")
-    return { 3 : NumGet(MSEX, 8, "UInt64"), 4 : NumGet(MSEX, 16, "UInt64") }
+    static init := OnMessage(0x0135, "CtlColorBtns")
+    return DllCall("gdi32\CreateSolidBrush", "uint", 0xFFFFFF, "uptr")
 }
 
-ClearMemory()
+GlobalMemoryStatusEx()                                          ; https://msdn.microsoft.com/en-us/library/aa366589(v=vs.85).aspx
 {
-    for objItem in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process")
-    {
-        hProcess := DllCall("kernel32.dll\OpenProcess", "UInt", 0x001F0FFF, "Int", 0, "UInt", objItem.ProcessID)
-        , DllCall("kernel32.dll\SetProcessWorkingSetSize", "Ptr", hProcess, "UPtr", -1, "UPtr", -1)
-        , DllCall("psapi.dll\EmptyWorkingSet", "Ptr", hProcess)
-        , DllCall("kernel32.dll\CloseHandle", "Ptr", hProcess)
-    }
-    return
+    static MSEX, init := NumPut(VarSetCapacity(MSEX, 64, 0), MSEX, "uint")
+    if !(DllCall("GlobalMemoryStatusEx", "ptr", &MSEX))
+        throw Exception("Call to GlobalMemoryStatusEx failed: " A_LastError, -1)
+    return { MemoryLoad: NumGet(MSEX, 4, "uint"), TotalPhys: NumGet(MSEX, 8, "uint64"), AvailPhys: NumGet(MSEX, 16, "uint64") }
 }
 
 FreeMemory()
 {
-    return DllCall("psapi.dll\EmptyWorkingSet", "Ptr", -1)
+    for objItem in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process") {
+        try {
+            hProcess := DllCall("OpenProcess", "uint", 0x001F0FFF, "int", 0, "uint", objItem.ProcessID, "ptr")
+            DllCall("SetProcessWorkingSetSize", "ptr", hProcess, "uptr", -1, "uptr", -1)
+            DllCall("psapi.dll\EmptyWorkingSet", "ptr", hProcess)
+            DllCall("CloseHandle", "ptr", hProcess)
+        }
+    }
+    return, DllCall("psapi.dll\EmptyWorkingSet", "ptr", -1)
+}
+
+GetNumberFormat(VarIn, locale := 0x0400)                        ; https://msdn.microsoft.com/en-us/library/dd318110(v=vs.85).aspx
+{
+    if !(size := DllCall("GetNumberFormat", "UInt", locale, "UInt", 0, "Ptr", &VarIn, "Ptr", 0, "Ptr", 0, "Int", 0))
+        throw Exception("GetNumberFormat", -1)
+    VarSetCapacity(buf, size * (A_IsUnicode ? 2 : 1), 0)
+    if !(DllCall("GetNumberFormat", "UInt", locale, "UInt", 0, "Ptr", &VarIn, "Ptr", 0, "Str", buf, "Int", size))
+        throw Exception("GetNumberFormat", -1)
+    return buf
 }
 
 ; EXIT ==========================================================================================================================
 
-Close:
 GuiClose:
 GuiEscape:
     ExitApp
