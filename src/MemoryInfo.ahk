@@ -101,10 +101,8 @@ GetNumberFormat(VarIn, locale := 0x0400)                        ; https://msdn.m
 SetTaskbarProgress(handle, value := 0, state := 0)              ; https://msdn.microsoft.com/en-us/library/dd391692(v=vs.85).aspx
 {
     static ITaskbarList3 := ""
-
     if !(ITaskbarList3)
         try ITaskbarList3 := ComObjCreate("{56FDF344-FD6D-11D0-958A-006097C9A090}", "{EA1AFB91-9E28-4B86-90E9-9E9F8A5EEFAF}")
-
     DllCall(NumGet(NumGet(ITaskbarList3 + 0) + 10 * A_PtrSize), "ptr", ITaskbarList3, "ptr", handle, "int", state)
     DllCall(NumGet(NumGet(ITaskbarList3 + 0) +  9 * A_PtrSize), "ptr", ITaskbarList3, "ptr", handle, "int64", value, "int64", 100)
     return (ITaskbarList3 ? 0 : 1)
