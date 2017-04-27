@@ -4,6 +4,9 @@
 #SingleInstance Force
 SetBatchLines -1
 
+global TaskbarProgressEnabled := true     ; false -> off     |   true -> on
+global TaskbarProgressColored := false    ; false -> green   |   true -> green > yellow > red
+
 ; GUI ===========================================================================================================================
 
 Gui, +hWndhMainGUI
@@ -38,9 +41,15 @@ GET_MEMORY:
     GuiControl,, EdtTotalPhys, % GetNumberFormat((TP := GSMEx.TotalPhys) / 1048576) " MB"
     GuiControl,, EdtAvailPhys, % GetNumberFormat((AP := GSMEx.AvailPhys) / 1048576) " MB"
     GuiControl,, EdtFreePhys,  % GetNumberFormat((TP - AP) / 1048576) " MB"
-    GuiControl,, PrgMemLoad,   % GSMEx.MemoryLoad
-    GuiControl,, EdtMemLoad,   % GSMEx.MemoryLoad " %"
-    DllCall("user32\SetWindowText", "ptr", hMainGUI, "str", "Mem: " GSMEx.MemoryLoad " %")
+    GuiControl,, PrgMemLoad,   % ML := GSMEx.MemoryLoad
+    GuiControl,, EdtMemLoad,   % ML " %"
+    DllCall("user32\SetWindowText", "ptr", hMainGUI, "str", "Mem: " ML " %")
+    if (TaskbarProgressEnabled) {
+        if (TaskbarProgressColored)
+            SetTaskbarProgress(hMainGUI, ML, (ML > 84) ? 4 : (ML > 74) ? 8 : 2)
+        else
+            SetTaskbarProgress(hMainGUI, ML)
+    }
 return
 
 FREE_MEMORY:
@@ -87,6 +96,18 @@ GetNumberFormat(VarIn, locale := 0x0400)                        ; https://msdn.m
     if !(DllCall("GetNumberFormat", "UInt", locale, "UInt", 0, "Ptr", &VarIn, "Ptr", 0, "Str", buf, "Int", size))
         throw Exception("GetNumberFormat", -1)
     return buf
+}
+
+SetTaskbarProgress(handle, value := 0, state := 0)              ; https://msdn.microsoft.com/en-us/library/dd391692(v=vs.85).aspx
+{
+    static ITaskbarList3 := ""
+
+    if !(ITaskbarList3)
+        try ITaskbarList3 := ComObjCreate("{56FDF344-FD6D-11D0-958A-006097C9A090}", "{EA1AFB91-9E28-4B86-90E9-9E9F8A5EEFAF}")
+
+    DllCall(NumGet(NumGet(ITaskbarList3 + 0) + 10 * A_PtrSize), "ptr", ITaskbarList3, "ptr", handle, "int", state)
+    DllCall(NumGet(NumGet(ITaskbarList3 + 0) +  9 * A_PtrSize), "ptr", ITaskbarList3, "ptr", handle, "int64", value, "int64", 100)
+    return (ITaskbarList3 ? 0 : 1)
 }
 
 ; EXIT ==========================================================================================================================

@@ -6,10 +6,12 @@ Shows info about memory via AutoHotkey
 * Shows total, free & used memory in MB
 * Shows used memory in percentage %
 * Clear unused memory function
+* Taskbar progress
 
 
 ## Example
 ![MemoryInfo](img/MemoryInfo.png)
+![MemoryInfo_TaskbarProgress](img/MemoryInfo_TaskbarProgress.png)
 
 
 ## Info
